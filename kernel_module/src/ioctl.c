@@ -237,10 +237,12 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     
     //Setting calling thread's associated cid
     // unsigned long long int cid = temp_vma.cid;
-    unsigned long long int oid = temp_vma.oid;
+    // unsigned long long int oid = temp_vma.pgoffset;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside mmap : PID -> %d --- OID -> %llu", pid, oid);
+    printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, vma->vm_pgoff);
+    printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
+    printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
 
     return 0;
 }
