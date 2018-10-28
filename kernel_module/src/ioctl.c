@@ -232,18 +232,48 @@ struct task * get_next_task(struct task **head, int pid)
 
 int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
 {
+    struct vm_area_struct temp_vma;
+    copy_from_user(&temp_vma, vma, sizeof(struct vm_area_struct));
+    
+    //Setting calling thread's associated cid
+    unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
+    //Setting calling thread's associated pid
+    int pid = current->pid;
+    printk("\nInside mmap : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+
     return 0;
 }
 
 
 int memory_container_lock(struct memory_container_cmd __user *user_cmd)
 {
+    struct memory_container_cmd temp_cmd;
+    copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
+    
+    //Setting calling thread's associated cid
+    unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
+    //Setting calling thread's associated pid
+    int pid = current->pid;
+    printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+
     return 0;
 }
 
 
 int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
 {
+    struct memory_container_cmd temp_cmd;
+    copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
+    
+    //Setting calling thread's associated cid
+    unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
+    //Setting calling thread's associated pid
+    int pid = current->pid;
+    printk("\nInside unlock : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+
     return 0;
 }
 
@@ -372,6 +402,17 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
 
 int memory_container_free(struct memory_container_cmd __user *user_cmd)
 {
+    struct memory_container_cmd temp_cmd;
+    copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
+    
+    //Setting calling thread's associated cid
+    unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
+    //Setting calling thread's associated pid
+    int pid = current->pid;
+    printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+
+
     return 0;
 }
 
