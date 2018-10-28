@@ -251,8 +251,8 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
 int memory_container_delete(struct memory_container_cmd __user *user_cmd)
 {
     mutex_lock(&my_mutex);
-    struct processor_container_cmd temp_cmd;
-    copy_from_user(&temp_cmd, user_cmd, sizeof(struct processor_container_cmd));
+    struct memory_container_cmd temp_cmd;
+    copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
@@ -302,8 +302,8 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
     //Mutex Lock
     mutex_lock(&my_mutex);
 
-    struct processor_container_cmd temp_cmd;
-    copy_from_user(&temp_cmd, user_cmd, sizeof(struct processor_container_cmd));
+    struct memory_container_cmd temp_cmd;
+    copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
