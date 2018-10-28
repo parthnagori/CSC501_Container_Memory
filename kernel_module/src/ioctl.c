@@ -250,7 +250,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
 
 int memory_container_delete(struct memory_container_cmd __user *user_cmd)
 {
-    mutex_lock(&my_mutex);
+    // mutex_lock(&my_mutex);
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
@@ -270,21 +270,21 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
             next_task = get_next_task(&temp_task_head, pid);
             if (next_task->currTask->pid != pid)
             {    
-//                printk("\n PID: %d Waking next task PID: %d in CID: %llu before dying", pid, next_task->currTask->pid, cid);
-                wake_up_process(next_task->currTask);
-                mutex_unlock(&my_mutex);                
+               printk("\n PID: %d Waking next task PID: %d in CID: %llu before dying", pid, next_task->currTask->pid, cid);
+                // wake_up_process(next_task->currTask);
+                // mutex_unlock(&my_mutex);                
             }
             else{
-//                printk("\n No next tasks for PID: %d in CID: %llu - killing self", pid, cid);
-                mutex_unlock(&my_mutex);
+               printk("\n No next tasks for PID: %d in CID: %llu - killing self", pid, cid);
+                // mutex_unlock(&my_mutex);
             }
             temp_task_head = deletetask(&temp_task_head, pid);
-//            printk("\n Task deleted : %d within Container : %llu", pid, cid); 
+            // printk("\n Task deleted : %d within Container : %llu", pid, cid); 
             temp_container->task_list = temp_task_head;
             if (!temp_task_head)
             {
                 container_head = deletecontainer(&container_head, cid);
-//                printk("\n Container Deleted : %llu", cid);
+                printk("\n Container Deleted : %llu", cid);
                 break;
             }
         }
@@ -300,7 +300,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
 {
  
     //Mutex Lock
-    mutex_lock(&my_mutex);
+    // mutex_lock(&my_mutex);
 
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
@@ -348,19 +348,19 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
             temp_container=temp_container->next;
         }
         //Uncomment below code to see how tasks are getting allocated to containers
-//        printk("\nCreating task : CID -> %llu --- PID -> %d", cid, pid);
+       printk("\n New container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
 //        display_list();
-        mutex_unlock(&my_mutex);
+        // mutex_unlock(&my_mutex);
     }
     else
     {
         //If Container was already present, then put all incoming tasks to sleep.
-//        printk("\nCreating task : CID -> %llu --- PID -> %d", cid, pid);
+       printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
 //        printk("\nInitial Set to Sleep PID: %d in CID: %llu",pid,cid);
-        set_current_state(TASK_INTERRUPTIBLE);
+        // set_current_state(TASK_INTERRUPTIBLE);
 //        display_list();
-        mutex_unlock(&my_mutex);
-        schedule();
+        // mutex_unlock(&my_mutex);
+        // schedule();
     }
     return 0;
 }
