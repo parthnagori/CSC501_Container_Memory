@@ -236,8 +236,8 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     copy_from_user(&temp_vma, vma, sizeof(struct vm_area_struct));
     
     //Setting calling thread's associated cid
-    unsigned long long int cid = temp_cmd.cid;
-    unsigned long long int oid = temp_cmd.oid;
+    unsigned long long int cid = temp_vma.cid;
+    unsigned long long int oid = temp_vma.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
     printk("\nInside mmap : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
