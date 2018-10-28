@@ -256,9 +256,10 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-
+    printk("\nInside Delete : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
     struct container *temp_container;
     temp_container = container_head;
     while(temp_container)
@@ -307,8 +308,10 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
+    unsigned long long int oid = temp_cmd.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
+    printk("\nInside Create : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
 
     struct container *temp_container;
     temp_container = container_head;
@@ -323,6 +326,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
             task_head = temp_container->task_list;
             task_head = addtask(&task_head, current);
             temp_container->task_list = task_head;
+            printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
             flag = 1;
             break;
         }
@@ -355,7 +359,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
     else
     {
         //If Container was already present, then put all incoming tasks to sleep.
-       printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
+       // printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
 //        printk("\nInitial Set to Sleep PID: %d in CID: %llu",pid,cid);
         // set_current_state(TASK_INTERRUPTIBLE);
 //        display_list();
