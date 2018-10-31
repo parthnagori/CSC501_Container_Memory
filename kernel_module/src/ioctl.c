@@ -100,7 +100,7 @@ struct container * addcontainer(struct container **head, unsigned long long int 
 
 struct container * findcontainer(int cid, int pid)
 {
-    struct container *temp_container;
+    struct container *head;
     head = container_head;
 
     if (cid)
@@ -118,6 +118,7 @@ struct container * findcontainer(int cid, int pid)
     {
         while (head)
         {
+            struc task *task_head;
             task_head = head->task_list;
             while (task_head)
             {
