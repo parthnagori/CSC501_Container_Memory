@@ -256,7 +256,7 @@ void display_list(void)
         struct task *tl = tc->task_list;
         while(tl)
         {
-//            printk("\n CID : %llu ----  PID : %d State: %d", tc->cid, tl->currTask->pid, tl->currTask->state);
+            printk("\n CID : %llu ----  PID : %d State: %d", tc->cid, tl->currTask->pid, tl->currTask->state);
             tl=tl->next;
         }
         tc = tc->next;
@@ -324,15 +324,15 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
 {
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
-    
-    //Setting calling thread's associated cid
-    unsigned long long int cid = temp_cmd.cid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid);
-
+    //Setting calling thread's associated cid
+    // unsigned long long int cid = temp_cmd.cid;
     struct container *temp_container;
     temp_container = findcontainer(cid, NULL);
+    if (temp_container)
+        printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid);
+
     if (temp_container)
     {
         if (temp_container->object_list)
