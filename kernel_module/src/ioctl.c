@@ -164,7 +164,7 @@ struct task * addtask(struct task **head, struct task_struct* currTask)
 }
 
 
-struct task * addobject(struct object **head, int object_size, int oid)
+struct task * addobject(struct object **head, int oid)
 {
     struct object *temp = kmalloc( sizeof(struct object), GFP_KERNEL );
     if (temp == NULL)
@@ -174,6 +174,7 @@ struct task * addobject(struct object **head, int object_size, int oid)
     }    
         
     temp->oid = oid;
+    temp->address = NULL;
     if(*head == NULL)
     {
         temp->next = *head;
@@ -181,7 +182,7 @@ struct task * addobject(struct object **head, int object_size, int oid)
     }
     else
     {
-        struct task* temp2;
+        struct object* temp2;
         temp2= *head;
         while(temp2->next)
                 temp2=temp2->next;
@@ -334,15 +335,36 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     if (temp_container)
         printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
+    int flag =0;
     if (temp_container)
     {
         if (temp_container->object_list)
         {
-
+            struct object *temp_object;
+            temp_object = temp_container->object_list;
+            while(temp_object)
+            {
+                if (temp_object->oid == oid)
+                { 
+                    flag = 1;
+                    printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid)
+                    break
+                }
+                else
+                    temp_object = temp_object->next;
+            }
         }
         else
         {
-
+            flag = 0;
+        }
+        if (!flag)
+        {
+            struct object *object_head;
+            object_head = temp_container->object_list;
+            object_head = addobject(&object_head, oid);
+            temp_container->object_list = object_head;
+            printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
     }
     return 0;
