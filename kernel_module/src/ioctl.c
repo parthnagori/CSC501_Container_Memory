@@ -118,7 +118,7 @@ struct container * findcontainer(int cid, int pid)
     {
         while (head)
         {
-            struc task *task_head;
+            struct task *task_head;
             task_head = head->task_list;
             while (task_head)
             {
