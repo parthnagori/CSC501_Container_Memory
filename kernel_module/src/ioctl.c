@@ -347,7 +347,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
                 if (temp_object->oid == oid)
                 { 
                     flag = 1;
-                    printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid)
+                    printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     break;
                 }
                 else
