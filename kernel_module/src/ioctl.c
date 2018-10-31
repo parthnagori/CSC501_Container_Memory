@@ -260,6 +260,12 @@ void display_list(void)
             printk("\n CID : %llu ----  PID : %d State: %d", tc->cid, tl->currTask->pid, tl->currTask->state);
             tl=tl->next;
         }
+        struct object *ol = tc->object_list;
+        while(ol)
+        {
+            printk("\n CID : %llu ----  OID : %d", tc->cid, ol->oid);
+            ol=ol->next;
+        }
         tc = tc->next;
     }
 }
