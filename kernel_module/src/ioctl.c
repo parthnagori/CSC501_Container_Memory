@@ -329,7 +329,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     //Setting calling thread's associated cid
     // unsigned long long int cid = temp_cmd.cid;
     struct container *temp_container;
-    temp_container = findcontainer(cid, NULL);
+    temp_container = findcontainer(NULL,pid);
     if (temp_container)
         printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid);
 
