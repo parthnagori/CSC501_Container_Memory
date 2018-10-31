@@ -107,7 +107,7 @@ struct container * addcontainer(struct container **head, unsigned long long int 
     return *head;
 }
 
-struct container * findcontainer(int cid, int pid)
+struct container * findcontainer(int pid)
 {
     struct container *head;
     head = container_head;
@@ -173,7 +173,7 @@ struct task * addtask(struct task **head, struct task_struct* currTask)
 }
 
 
-struct task * addobject(struct object **head, int oid)
+struct object * addobject(struct object **head, int oid)
 {
     struct object *temp = kmalloc( sizeof(struct object), GFP_KERNEL );
     if (temp == NULL)
@@ -200,6 +200,8 @@ struct task * addobject(struct object **head, int oid)
     }
     return *head;
 }
+
+
 
 
 struct container * deletecontainer(struct container **head, unsigned long long int cid)
@@ -230,6 +232,7 @@ struct container * deletecontainer(struct container **head, unsigned long long i
     return *head;
 }
 
+
 struct task * deletetask(struct task **head, int pid)
 {
     struct task* temp_head, *prev;
@@ -257,6 +260,35 @@ struct task * deletetask(struct task **head, int pid)
     kfree(temp_head);
     return *head;
 }
+
+
+struct object * deleteobject(struct object **head, int oid)
+{
+    struct object* temp_head, *prev;
+    temp_head = *head;
+    if (temp_head != NULL && temp_head->currObject->oid == oid) 
+    {
+        *head = temp_head->next;
+        kfree(temp_head);
+        return *head;
+    }
+    while(temp_head != NULL && temp_head->currObject->oid != oid)
+    {
+        prev = temp_head;
+        temp_head = temp_head->next;
+    }
+    if (temp_head == NULL) 
+    {
+        return *head;
+    }
+    
+    prev->next = temp_head->next; 
+    kfree(temp_head);
+    return *head;
+
+}
+
+
 
 void display_list(void)
 {
@@ -339,7 +371,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     mem_vma = NULL;
     int pid = current->pid;
 
-    temp_container = findcontainer(NULL,pid);
+    temp_container = findcontainer(pid);
     currCid = temp_container->cid
     currHead = container_head
 
@@ -359,7 +391,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
                 currObj = currObj ->next;
             }
             if (currObj==NULL){
-                reservedMem = (char*) kmalloc((vma->vm_end - vma->vm_start)*sizeof(char), GFP_KERNEL);
+                char* reservedMem = (char*) kmalloc((vma->vm_end - vma->vm_start)*sizeof(char), GFP_KERNEL);
                 newObj = (struct object*) kcalloc(1,sizeof(struct object), GFP_KERNEL);
                 newObj -> address = reservedMem;
                 newObj -> next = NULL;
@@ -403,7 +435,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     // unsigned long long int cid = temp_cmd.cid;
     unsigned long long int oid = temp_cmd.oid;
     struct container *temp_container;
-    temp_container = findcontainer(NULL,pid);
+    temp_container = findcontainer(pid);
     if (temp_container)
         printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
