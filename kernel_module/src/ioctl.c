@@ -51,12 +51,21 @@ struct task{
     struct task *next;
 };
 
+//Declaring a list to store Object Ids
 struct object{
     unsigned long long int oid;
+    unsigned long PFNumber;
     char* address;
     struct object *next;
 };
 
+//Declaring list for Locks for Objects Ids
+struct lock{
+    unsigned long long int oid;
+    struct mutex lockoid;
+    struct lock *next;
+
+}
 //Declaring a list to store container ids and a pointer to associated task ids
 struct container {
     unsigned long long int cid;
@@ -312,16 +321,73 @@ struct task * get_next_task(struct task **head, int pid)
 int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
 {
     struct vm_area_struct temp_vma;
-    copy_from_user(&temp_vma, vma, sizeof(struct vm_area_struct));
+    struct container *temp_container;
+    struct object *currObj;
+    struct object *prevObj = NULL;
+    struct object *newObj = NULL;
+    unsigned long ObjSize;
+    unsigned long long int currCid;
+
+    struct vm_area_struct* mem_vma = (struct vm_area_struct*) kcalloc(1,sizeof(struct *), GFP_KERNEL);
+    mutex_lock(&lock);
+    copy_from_user(mem_vma, vma, sizeof(struct vm_area_struct));
+
+    unsigned long long int curr_offset = mem_vma->vm_pgoff;
+    ObjSize = mem_vma->vm_end - mem_vma->vm_start;
     
+    kfree(mem_vma);
+    mem_vma = NULL;
+    int pid = current->pid;
+
+    temp_container = findcontainer(NULL,pid);
+    currCid = temp_container->cid
+    currHead = container_head
+
+    while (currCid != NULL) 
+    {
+        if (currHead->cid == currCid)
+        {
+            currObj = curr->object_list;
+            while (currObj !=NULL)
+            {
+                if (currObj->oid == vma->vm_pgoff)
+                {
+                remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
+                break;
+                }
+                prevObj = currObj;
+                currObj = currObj ->next;
+            }
+            if (currObj==NULL){
+                reservedMem = (char*) kmalloc((vma->vm_end - vma->vm_start)*sizeof(char), GFP_KERNEL);
+                newObj = (struct object*) kcalloc(1,sizeof(struct object), GFP_KERNEL);
+                newObj -> address = reservedMem;
+                newObj -> next = NULL;
+                newObj -> oid = (unsigned long long int)vma->vm_pgoff;
+                newObj -> PFNumber = virt_to_phys((void*)reservedMem)>>PAGE_SHIFT;
+                remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
+
+                if(prevObj == NULL){
+                    currHead->object_list = newObj;
+                }
+                else prevObj->next = newObj;
+            }
+            break;
+
+        }
+        currHead = currHead->next;
+
+    }
+    mutex_unlock(&lock)
+
     //Setting calling thread's associated cid
     // unsigned long long int cid = temp_vma.cid;
     // unsigned long long int oid = temp_vma.pgoffset;
     //Setting calling thread's associated pid
-    int pid = current->pid;
-    printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, vma->vm_pgoff);
-    printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
-    printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
+
+    // printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, vma->vm_pgoff);
+    // printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
+    // printk("\n mmap diff : %lu", );
 
     return 0;
 }
@@ -506,7 +572,6 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
 
     return 0;
 }
-
 
 /**
  * control function that receive the command in user space and pass arguments to
