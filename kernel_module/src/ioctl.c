@@ -51,11 +51,18 @@ struct task{
     struct task *next;
 };
 
+struct object{
+    unsigned long long int oid;
+    char* address;
+    struct object *next;
+};
+
 //Declaring a list to store container ids and a pointer to associated task ids
 struct container {
     unsigned long long int cid;
     struct container *next;
     struct task *task_list;
+    struct object *object_list;
 }*container_head = NULL;
 
 //Declaring a mutex variable
@@ -73,6 +80,7 @@ struct container * addcontainer(struct container **head, unsigned long long int 
     }
     temp->cid = cid;
     temp->task_list = NULL;
+    temp->object_list = NULL;
     if(*head == NULL)
     {
         temp->next = *head;
@@ -90,6 +98,41 @@ struct container * addcontainer(struct container **head, unsigned long long int 
     return *head;
 }
 
+struct container * findcontainer(int cid, int pid)
+{
+    struct container *temp_container;
+    head = container_head;
+
+    if (cid)
+    {
+        while (head)
+        {
+            if (head->cid == cid)
+                return head;
+            else
+                head = head->next;
+        }
+        return NULL;
+    }
+    if (pid)
+    {
+        while (head)
+        {
+            task_head = head->task_list;
+            while (task_head)
+            {
+                if (task_head->currTask->pid == pid)
+                    return head;
+                else
+                    task_head = task_head->next;
+            }
+            head = head->next;
+        }
+        return NULL;
+    }
+    return NULL;
+}
+
 //Adding a new task to an already existing container's task list
 //returns pointer to the head of the list
 struct task * addtask(struct task **head, struct task_struct* currTask)
@@ -102,6 +145,34 @@ struct task * addtask(struct task **head, struct task_struct* currTask)
     }    
         
     temp->currTask = currTask;
+    if(*head == NULL)
+    {
+        temp->next = *head;
+        *head=temp;
+    }
+    else
+    {
+        struct task* temp2;
+        temp2= *head;
+        while(temp2->next)
+                temp2=temp2->next;
+        temp->next=temp2->next;
+        temp2->next=temp;
+    }
+    return *head;
+}
+
+
+struct task * addobject(struct object **head, int object_size, int oid)
+{
+    struct object *temp = kmalloc( sizeof(struct object), GFP_KERNEL );
+    if (temp == NULL)
+    {
+        printk("Not enough memory to add object : %d", oid);
+        return *head;
+    }    
+        
+    temp->oid = oid;
     if(*head == NULL)
     {
         temp->next = *head;
@@ -255,11 +326,23 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
-    unsigned long long int oid = temp_cmd.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+    printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid);
 
+    struct container *temp_container;
+    temp_container = findcontainer(cid, NULL);
+    if (temp_container)
+    {
+        if (temp_container->object_list)
+        {
+
+        }
+        else
+        {
+
+        }
+    }
     return 0;
 }
 
@@ -282,16 +365,15 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
 
 int memory_container_delete(struct memory_container_cmd __user *user_cmd)
 {
-    // mutex_lock(&my_mutex);
+    mutex_lock(&my_mutex);
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
-    unsigned long long int oid = temp_cmd.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside Delete : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+    printk("\nInside Delete : CID -> %llu --- PID -> %d", cid, pid);
     struct container *temp_container;
     temp_container = container_head;
     while(temp_container)
@@ -299,20 +381,8 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
         if (temp_container->cid == cid)
         {    
             struct task *temp_task_head = temp_container->task_list;
-            struct task *next_task;
-            next_task = get_next_task(&temp_task_head, pid);
-            if (next_task->currTask->pid != pid)
-            {    
-               printk("\n PID: %d Waking next task PID: %d in CID: %llu before dying", pid, next_task->currTask->pid, cid);
-                // wake_up_process(next_task->currTask);
-                // mutex_unlock(&my_mutex);                
-            }
-            else{
-               printk("\n No next tasks for PID: %d in CID: %llu - killing self", pid, cid);
-                // mutex_unlock(&my_mutex);
-            }
             temp_task_head = deletetask(&temp_task_head, pid);
-            // printk("\n Task deleted : %d within Container : %llu", pid, cid); 
+            printk("\n Task deleted : %d within Container : %llu", pid, cid); 
             temp_container->task_list = temp_task_head;
             if (!temp_task_head)
             {
@@ -323,8 +393,9 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
         }
         temp_container = temp_container->next;
     }
-//    printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
-//    display_list();
+    // printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
+    display_list();
+    mutex_unlock(&my_mutex);
     return 0;
 }
 
@@ -333,17 +404,16 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
 {
  
     //Mutex Lock
-    // mutex_lock(&my_mutex);
+    mutex_lock(&my_mutex);
 
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
     //Setting calling thread's associated cid
     unsigned long long int cid = temp_cmd.cid;
-    unsigned long long int oid = temp_cmd.oid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside Create : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+    printk("\nInside Create : CID -> %llu --- PID -> %d", cid, pid);
 
     struct container *temp_container;
     temp_container = container_head;
@@ -383,21 +453,10 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
             }
             temp_container=temp_container->next;
         }
-        //Uncomment below code to see how tasks are getting allocated to containers
        printk("\n New container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
-//        display_list();
-        // mutex_unlock(&my_mutex);
     }
-    else
-    {
-        //If Container was already present, then put all incoming tasks to sleep.
-       // printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
-//        printk("\nInitial Set to Sleep PID: %d in CID: %llu",pid,cid);
-        // set_current_state(TASK_INTERRUPTIBLE);
-//        display_list();
-        // mutex_unlock(&my_mutex);
-        // schedule();
-    }
+    display_list();
+    mutex_unlock(&my_mutex);
     return 0;
 }
 
