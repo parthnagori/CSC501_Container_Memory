@@ -500,12 +500,12 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
             lock_head = addlock(&lock_head, oid);
             temp_container->lock_list = lock_head;
             printk("\nCreating Lock : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            mutex_unlock(&my_mutex);
         }
     }
     else{
         printk("\nContainer with PID -> %d not found", pid);
     }
-    mutex_unlock(&my_mutex);
     return 0;
 }
 
