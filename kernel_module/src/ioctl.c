@@ -53,6 +53,7 @@ struct task{
 
 struct object{
     unsigned long long int oid;
+    unsigned long pfn;
     char* address;
     struct object *next;
 };
@@ -106,7 +107,7 @@ struct container * addcontainer(struct container **head, unsigned long long int 
     return *head;
 }
 
-struct object * findobject(struct object **head, unsigned long long int oid)
+struct object * findobject(struct object *head, unsigned long long int oid)
 {
     while(head)
     {
@@ -122,18 +123,6 @@ struct container * findcontainer(int pid)
 {
     struct container *head;
     head = container_head;
-
-    if (cid)
-    {
-        while (head)
-        {
-            if (head->cid == cid)
-                return head;
-            else
-                head = head->next;
-        }
-        return NULL;
-    }
     if (pid)
     {
         while (head)
@@ -391,10 +380,11 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     struct vm_area_struct temp_vma;
     copy_from_user(&temp_vma, vma, sizeof(struct vm_area_struct));
     struct container *temp_container;
-    temp_container = findcontainer(pid);
-    int object_size = temp_vma->vm_end - temp_vma->vm_start;
     int pid = current->pid;
-    printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, vma->vm_pgoff);
+    temp_container = findcontainer(pid);
+    int object_size = vma->vm_end - vma->vm_start;
+    unsigned long long int oid = vma->vm_pgoff;
+    printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, oid);
     printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
     printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
     int flag = 0;
@@ -424,14 +414,14 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
             object_head = addobject(&object_head, oid);
             printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             temp_container->object_list = object_head;
-            curr_object = findobject(object_head, oid);
+            curr_object = findobject(temp_container->object_list, oid);
             if (curr_object)
             {
                 char *memory_space = (char*)(kmalloc(object_size, GFP_KERNEL ));
                 curr_object->address = memory_space;
                 unsigned long pfn = virt_to_phys(memory_space);
                 curr_object->pfn = pfn;
-                int remaped = remap_pfn_range(temp_vma, temp_vma->start, pfn, object_size,temp_vma->vm_page_prot);
+                int remaped = remap_pfn_range(vma, vma->start, pfn, object_size,vma->vm_page_prot);
                 if (remaped < 0)
                 {
                     printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
@@ -658,6 +648,8 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
     unsigned long long int oid = temp_cmd.oid;
     struct container *temp_container;
     temp_container = findcontainer(pid);
+    struct object *temp_object_list;
+
     if (temp_container)
         printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
     int flag = 0;
@@ -674,7 +666,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
                     flag = 1;
                     kfree(temp_object->address);
                     temp_object->address = NULL;
-                    temp_object = deleteobject(temp_object, oid);
+                    temp_object_list = deleteobject(temp_object, oid);
                     printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     break;
                 }
@@ -684,7 +676,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
         }
         if (flag)
         {
-            temp_container->object_list = temp_object;
+            temp_container->object_list = temp_object_list;
         }
         else{
             printk("\nObject not found: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
