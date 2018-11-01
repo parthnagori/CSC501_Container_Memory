@@ -112,7 +112,7 @@ struct container * findcontainer(int pid)
 {
     struct container *head;
     head = container_head;
-    cid = head->cid
+    cid = head->cid;
 
     if (cid)
     {
@@ -357,65 +357,65 @@ struct task * get_next_task(struct task **head, int pid)
 
 int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
 {
-    struct vm_area_struct temp_vma;
-    struct container *temp_container;
-    struct object *currObj;
-    struct object *prevObj = NULL;
-    struct object *newObj = NULL;
-    unsigned long ObjSize;
-    unsigned long long int currCid;
+    // struct vm_area_struct temp_vma;
+    // struct container *temp_container;
+    // struct object *currObj;
+    // struct object *prevObj = NULL;
+    // struct object *newObj = NULL;
+    // unsigned long ObjSize;
+    // unsigned long long int currCid;
 
-    struct vm_area_struct* mem_vma = (struct vm_area_struct*) kcalloc(1,sizeof(struct), GFP_KERNEL);
-    mutex_lock(&lock);
-    copy_from_user(mem_vma, vma, sizeof(struct vm_area_struct));
+    // struct vm_area_struct* mem_vma = (struct vm_area_struct*) kcalloc(1,sizeof(struct), GFP_KERNEL);
+    // mutex_lock(&lock);
+    // copy_from_user(mem_vma, vma, sizeof(struct vm_area_struct));
 
-    unsigned long long int curr_offset = mem_vma->vm_pgoff;
-    ObjSize = mem_vma->vm_end - mem_vma->vm_start;
+    // unsigned long long int curr_offset = mem_vma->vm_pgoff;
+    // ObjSize = mem_vma->vm_end - mem_vma->vm_start;
     
-    kfree(mem_vma);
-    mem_vma = NULL;
-    int pid = current->pid;
+    // kfree(mem_vma);
+    // mem_vma = NULL;
+    // int pid = current->pid;
 
-    temp_container = findcontainer(pid);
-    currCid = temp_container->cid;
-    currHead = container_head;
+    // temp_container = findcontainer(pid);
+    // currCid = temp_container->cid;
+    // currHead = container_head;
 
-    while (currCid != NULL) 
-    {
-        if (currHead->cid == currCid)
-        {
-            currObj = curr->object_list;
-            while (currObj !=NULL)
-            {
-                if (currObj->oid == vma->vm_pgoff)
-                {
-                remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
-                break;
-                }
-                prevObj = currObj;
-                currObj = currObj ->next;
-            }
-            if (currObj==NULL){
-                char* reservedMem = (char*) kmalloc((vma->vm_end - vma->vm_start)*sizeof(char), GFP_KERNEL);
-                newObj = (struct object*) kcalloc(1,sizeof(struct object), GFP_KERNEL);
-                newObj -> address = reservedMem;
-                newObj -> next = NULL;
-                newObj -> oid = (unsigned long long int)vma->vm_pgoff;
-                newObj -> PFNumber = virt_to_phys((void*)reservedMem)>>PAGE_SHIFT;
-                remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
+    // while (currCid != NULL) 
+    // {
+    //     if (currHead->cid == currCid)
+    //     {
+    //         currObj = curr->object_list;
+    //         while (currObj !=NULL)
+    //         {
+    //             if (currObj->oid == vma->vm_pgoff)
+    //             {
+    //             remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
+    //             break;
+    //             }
+    //             prevObj = currObj;
+    //             currObj = currObj ->next;
+    //         }
+    //         if (currObj==NULL){
+    //             char* reservedMem = (char*) kmalloc((vma->vm_end - vma->vm_start)*sizeof(char), GFP_KERNEL);
+    //             newObj = (struct object*) kcalloc(1,sizeof(struct object), GFP_KERNEL);
+    //             newObj -> address = reservedMem;
+    //             newObj -> next = NULL;
+    //             newObj -> oid = (unsigned long long int)vma->vm_pgoff;
+    //             newObj -> PFNumber = virt_to_phys((void*)reservedMem)>>PAGE_SHIFT;
+    //             remap_pfn_range(vma, vma->vm_start, currObj->PFNumber, vma->vm_end-vma->vm_start, vma->vm_page_prot);
 
-                if(prevObj == NULL){
-                    currHead->object_list = newObj;
-                }
-                else prevObj->next = newObj;
-            }
-            break;
+    //             if(prevObj == NULL){
+    //                 currHead->object_list = newObj;
+    //             }
+    //             else prevObj->next = newObj;
+    //         }
+    //         break;
 
-        }
-        currHead = currHead->next;
+    //     }
+    //     currHead = currHead->next;
 
-    }
-    mutex_unlock(&lock)
+    // }
+    // mutex_unlock(&lock)
 
     //Setting calling thread's associated cid
     // unsigned long long int cid = temp_vma.cid;
@@ -614,6 +614,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
             
             if (temp_object_head)
             {
+                struct object *obj;
                 obj = findobject(&temp_object_head,oid);
                 kfree(obj->address);
                 obj->address = NULL;
