@@ -516,7 +516,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
             {
                 if (temp_lock->oid == oid)
                 { 
-                    mutex_unlock(temp_lock->object_lock);
+                    mutex_unlock(&(temp_lock->object_lock));
                     flag = 1;
                     printk("\nLock unlocked: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     break;
