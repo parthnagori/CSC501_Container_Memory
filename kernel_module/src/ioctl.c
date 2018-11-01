@@ -402,7 +402,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     //Finding corresponding container from pid
     struct container *temp_container;
     temp_container = findcontainer(pid);
-    if (temp_container)
+    // if (temp_container)
         // printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
     int flag =0;
@@ -432,7 +432,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
     //Finding corresponding container from pid
     struct container *temp_container;
     temp_container = findcontainer(pid);
-    if (temp_container)
+    // if (temp_container)
         // printk("\nInside unlock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
     int flag =0;
