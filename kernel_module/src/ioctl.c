@@ -307,9 +307,10 @@ struct object * deleteobject(struct object **head, unsigned long long int oid)
             printk("\nObject to be freed found OID: %llu", oid);
             kfree(temp_head->address);
             temp_head->address = NULL;
-            printk("\nSet address pointer to NULL");  
+            // printk("\nSet address pointer to NULL");  
             kfree(temp_head);
             printk("\nReturning object list");         
+            display_obj_list(*head);
             return *head; 
         }
     while (temp_head != NULL && temp_head->oid != oid) 
@@ -328,9 +329,10 @@ struct object * deleteobject(struct object **head, unsigned long long int oid)
     printk("\nObject to be freed found OID: %llu", oid);
     kfree(temp_head->address);
     temp_head->address = NULL; 
-    printk("\nSet address pointer to NULL");  
+    // printk("\nSet address pointer to NULL");  
     kfree(temp_head);
     printk("\nReturning object list");
+    display_obj_list(*head);
     return *head;
 }
 
@@ -436,6 +438,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
                 curr_object->pfn = pfn;
                 int remaped = remap_pfn_range(vma, vma->vm_start, pfn, object_size,vma->vm_page_prot);
                 printk("\nmmap done successfully");
+                display_obj_list(temp_container->object_list);
                 if (remaped < 0)
                 {
                     printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
