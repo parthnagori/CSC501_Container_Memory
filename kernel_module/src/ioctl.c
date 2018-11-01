@@ -58,12 +58,6 @@ struct object{
     struct object *next;
 };
 
-// struct lock{
-//     unsigned long long int oid;
-//     struct mutex object_lock;
-//     struct lock *next;
-// };
-
 //Declaring a list to store container ids and a pointer to associated task ids
 struct container {
     unsigned long long int cid;
@@ -202,36 +196,6 @@ struct object * addobject(struct object **head, unsigned long long int oid)
     }
     return *head;
 }
-
-// struct lock * addlock(struct lock **head, unsigned long long int oid)
-// {
-//     struct lock *temp = kmalloc( sizeof(struct lock), GFP_KERNEL );
-//     if (temp == NULL)
-//     {
-//         printk("Not enough memory to add object : %d", oid);
-//         return *head;
-//     }        
-//     temp->oid = oid;
-//     mutex_init(&(temp->object_lock));
-//     mutex_unlock(&my_mutex);
-//     mutex_lock(&(temp->object_lock));
-//     mutex_lock(&my_mutex);
-//     if(*head == NULL)
-//     {
-//         temp->next = *head;
-//         *head=temp;
-//     }
-//     else
-//     {
-//         struct lock* temp2;
-//         temp2= *head;
-//         while(temp2->next)
-//                 temp2=temp2->next;
-//         temp->next=temp2->next;
-//         temp2->next=temp;
-//     }
-//     return *head;
-// }
 
 
 struct container * deletecontainer(struct container **head, unsigned long long int cid)
@@ -480,34 +444,6 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     {
         mutex_unlock(&my_mutex);
         mutex_lock(&(temp_container->object_lock));
-        // if (temp_container->lock_list)
-        // {
-        //     struct lock *temp_lock;
-        //     temp_lock = temp_container->lock_list;
-        //     while(temp_lock)
-        //     {
-        //         if (temp_lock->oid == oid)
-        //         { 
-        //             // mutex_init(&(temp_lock->object_lock));
-        //             flag = 1;
-        //             printk("\nLock exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-        //             mutex_unlock(&my_mutex);
-        //             mutex_lock(&(temp_lock->object_lock));
-        //             break;
-        //         }
-        //         else
-        //             temp_lock = temp_lock->next;
-        //     }
-        // }
-        // if (!flag)
-        // {
-        //     struct lock *lock_head;
-        //     lock_head = temp_container->lock_list;
-        //     lock_head = addlock(&lock_head, oid);
-        //     temp_container->lock_list = lock_head;
-        //     printk("\nCreating Lock : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-        //     mutex_unlock(&my_mutex);
-        // }
     }
     else{
         printk("\nContainer with PID -> %d not found", pid);
@@ -537,29 +473,6 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
     {
         mutex_unlock(&my_mutex);
         mutex_unlock(&(temp_container->object_lock));
-        // if (temp_container->lock_list)
-        // {
-        //     struct lock *temp_lock;
-        //     temp_lock = temp_container->lock_list;
-        //     while(temp_lock)
-        //     {
-        //         if (temp_lock->oid == oid)
-        //         { 
-        //             mutex_unlock(&my_mutex);
-        //             mutex_unlock(&(temp_lock->object_lock));
-        //             flag = 1;
-        //             printk("\nLock unlocked: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-        //             break;
-        //         }
-        //         else
-        //             temp_lock = temp_lock->next;
-        //     }
-        // }
-        // if (!flag)
-        // {
-        //     printk("\nLock not found : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-        //     mutex_unlock(&my_mutex);
-        // }
     }
     else{
         printk("\nContainer with PID -> %d not found", pid);
