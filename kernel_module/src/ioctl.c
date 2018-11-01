@@ -287,10 +287,10 @@ struct task * deletetask(struct task **head, int pid)
 }
 
 void display_obj_list(struct object *head){
-    printk("Displaying object list");
+    printk("\nDisplaying object list");
     while(head)
     {
-        printk("Object OID -> %llu", head->oid);
+        printk("\nObject OID -> %llu", head->oid);
         head = head->next;
     }
 }
