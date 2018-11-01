@@ -421,7 +421,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
                 curr_object->address = memory_space;
                 unsigned long pfn = virt_to_phys(memory_space);
                 curr_object->pfn = pfn;
-                int remaped = remap_pfn_range(vma, vma->start, pfn, object_size,vma->vm_page_prot);
+                int remaped = remap_pfn_range(vma, vma->vm_start, pfn, object_size,vma->vm_page_prot);
                 if (remaped < 0)
                 {
                     printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
@@ -463,8 +463,8 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
             {
                 if (temp_lock->oid == oid)
                 { 
-                    mutex_init(temp_lock->object_lock);
-                    mutex_lock(temp_lock->object_lock);
+                    mutex_init(&(temp_lock->object_lock));
+                    mutex_lock(&(temp_lock->object_lock));
                     flag = 1;
                     printk("\nLock exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     break;
@@ -651,7 +651,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
     struct object *temp_object_list;
 
     if (temp_container)
-        printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
+        printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
     int flag = 0;
     if (temp_container)
     {
