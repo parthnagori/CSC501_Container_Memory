@@ -672,7 +672,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
             while(temp_object_list)
             {
                 flag = 1;
-                temp_object_list = deleteobject(temp_object, oid);
+                temp_object_list = deleteobject(temp_object_list, oid);
                 printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                 break;
             }
