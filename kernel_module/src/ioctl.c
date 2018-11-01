@@ -565,28 +565,26 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     
     //Setting calling thread's associated cid
-    unsigned long long int cid = temp_cmd.cid;
+    
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside Delete : CID -> %llu --- PID -> %d", cid, pid);
     struct container *temp_container;
-    temp_container = container_head;
-    while(temp_container)
+    temp_container = findcontainer(pid);
+    unsigned long long int cid = temp_container->cid;
+    printk("\nInside Delete : CID -> %llu --- PID -> %d", cid, pid);
+    if(temp_container)
     {
-        if (temp_container->cid == cid)
-        {    
-            struct task *temp_task_head = temp_container->task_list;
-            temp_task_head = deletetask(&temp_task_head, pid);
-            printk("\n Task deleted : %d within Container : %llu", pid, cid); 
-            temp_container->task_list = temp_task_head;
-            // if (!temp_task_head)
-            // {
-            //     container_head = deletecontainer(&container_head, cid);
-            //     printk("\n Container Deleted : %llu", cid);
-            //     break;
-            // }
-        }
-        temp_container = temp_container->next;
+    
+        struct task *temp_task_head = temp_container->task_list;
+        temp_task_head = deletetask(&temp_task_head, pid);
+        printk("\n Task deleted : %d within Container : %llu", pid, cid); 
+        temp_container->task_list = temp_task_head;
+        // if (!temp_task_head)
+        // {
+        //     container_head = deletecontainer(&container_head, cid);
+        //     printk("\n Container Deleted : %llu", cid);
+        //     break;
+        // }
     }
     // printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
     display_list();
