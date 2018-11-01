@@ -173,7 +173,7 @@ struct task * addtask(struct task **head, struct task_struct* currTask)
 }
 
 
-struct object * addobject(struct object **head, int oid)
+struct object * addobject(struct object **head, unsigned long long int oid)
 {
     struct object *temp = kmalloc( sizeof(struct object), GFP_KERNEL );
     if (temp == NULL)
@@ -201,7 +201,7 @@ struct object * addobject(struct object **head, int oid)
     return *head;
 }
 
-struct lock * addlock(struct lock **head, int oid)
+struct lock * addlock(struct lock **head, unsigned long long int oid)
 {
     struct lock *temp = kmalloc( sizeof(struct lock), GFP_KERNEL );
     if (temp == NULL)
@@ -286,9 +286,19 @@ struct task * deletetask(struct task **head, int pid)
     return *head;
 }
 
-struct object * deleteobject(struct object **head, int oid)
+void display_obj_list(struct object *head){
+    printk("Displaying object list");
+    while(head)
+    {
+        printk("Object OID -> %llu", head->oid);
+        head = head->next;
+    }
+}
+
+struct object * deleteobject(struct object **head, unsigned long long int oid)
 {
     printk("\nInside delete object");
+    display_obj_list(*head);
     struct object* temp_head, *prev;
     temp_head = *head;
     if (temp_head != NULL && temp_head->oid == oid) 
@@ -302,7 +312,6 @@ struct object * deleteobject(struct object **head, int oid)
             printk("\nReturning object list");         
             return *head; 
         }
-
     while (temp_head != NULL && temp_head->oid != oid) 
     { 
         prev = temp_head; 
@@ -663,26 +672,17 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
 
     if (temp_container)
         printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
-    int flag = 0;
     if (temp_container)
     {
-        if (temp_container->object_list)
+        temp_object_list = temp_container->object_list;
+        if (temp_object_list)
         {
-            temp_object_list = temp_container->object_list;
-            while(temp_object_list)
-            {
-                flag = 1;
-                temp_object_list = deleteobject(temp_object_list, oid);
-                printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-                break;
-            }
-        }
-        if (flag)
-        {
+            temp_object_list = deleteobject(temp_object_list, oid);
             temp_container->object_list = temp_object_list;
+            printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
         else{
-            printk("\nObject not found: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            printk("\nObject list empty: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
     }
     else{
