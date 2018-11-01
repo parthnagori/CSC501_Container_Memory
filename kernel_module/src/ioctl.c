@@ -211,7 +211,7 @@ struct lock * addlock(struct lock **head, unsigned long long int oid)
     }        
     temp->oid = oid;
     mutex_init(&(temp->object_lock));
-    mutex_unlock(&(temp->object_lock));
+    mutex_lock(&(temp->object_lock));
     if(*head == NULL)
     {
         temp->next = *head;
@@ -480,7 +480,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
             {
                 if (temp_lock->oid == oid)
                 { 
-                    mutex_init(&(temp_lock->object_lock));
+                    // mutex_init(&(temp_lock->object_lock));
                     mutex_lock(&(temp_lock->object_lock));
                     flag = 1;
                     printk("\nLock exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
