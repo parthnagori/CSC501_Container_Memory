@@ -65,7 +65,8 @@ struct lock{
     struct mutex lockoid;
     struct lock *next;
 
-}
+};
+
 //Declaring a list to store container ids and a pointer to associated task ids
 struct container {
     unsigned long long int cid;
@@ -528,6 +529,7 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
 }
 
 
+
 int memory_container_create(struct memory_container_cmd __user *user_cmd)
 {
  
@@ -589,19 +591,38 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
 }
 
 
+
+
 int memory_container_free(struct memory_container_cmd __user *user_cmd)
-{
+{   
+    mutex_lock(&my_mutex);
     struct memory_container_cmd temp_cmd;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
-    
-    //Setting calling thread's associated cid
-    unsigned long long int cid = temp_cmd.cid;
-    unsigned long long int oid = temp_cmd.oid;
-    //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", cid, pid, oid);
-
-
+    struct container *temp_container;
+    temp_container = container_head;
+    while(temp_container)
+    {
+        if (temp_container->cid == cid)
+        {
+            struct object *temp_object_head = temp_container->object_list;
+            if (temp_object_head)
+            {
+                kfree(object->address);
+                object->address = NULL;
+                temp_object_head = deleteobject(&temp_object_head,oid)
+                temp_container -> object_list = temp_object_head;
+            }
+            if (!temp_object_head)
+            {
+                printk("\n No Object with oid: %d  exits in Container with cid: %llu", oid,cid);
+                break;
+            }
+        }
+        temp_container = temp_container->next;
+    }
+    display_list();
+    mutex_unlock(&my_mutex);
     return 0;
 }
 
