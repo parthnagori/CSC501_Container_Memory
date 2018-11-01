@@ -77,7 +77,7 @@ struct container * addcontainer(struct container **head, unsigned long long int 
     struct container* temp = kmalloc( sizeof(struct container), GFP_KERNEL );
     if (temp == NULL)
     {
-        printk("Not enough memory to add container : %llu", cid);
+        // printk("Not enough memory to add container : %llu", cid);
         return *head;
     }
     temp->cid = cid;
@@ -144,7 +144,7 @@ struct task * addtask(struct task **head, struct task_struct* currTask)
     struct task *temp = kmalloc( sizeof(struct task), GFP_KERNEL );
     if (temp == NULL)
     {
-        printk("Not enough memory to add task : %d", currTask->pid);
+        // printk("Not enough memory to add task : %d", currTask->pid);
         return *head;
     }    
         
@@ -172,7 +172,7 @@ struct object * addobject(struct object **head, unsigned long long int oid)
     struct object *temp = kmalloc( sizeof(struct object), GFP_KERNEL );
     if (temp == NULL)
     {
-        printk("Not enough memory to add object : %d", oid);
+        // printk("Not enough memory to add object : %d", oid);
         return *head;
     }    
         
@@ -215,7 +215,7 @@ struct container * deletecontainer(struct container **head, unsigned long long i
    
     if (temp_head == NULL) 
     {
-        printk("\nContainer not found : %llu", cid);
+        // printk("\nContainer not found : %llu", cid);
         return *head;
     } 
 
@@ -243,7 +243,7 @@ struct task * deletetask(struct task **head, int pid)
    
     if (temp_head == NULL) 
     {
-        printk("\nTask not found : %d", pid);
+        // printk("\nTask not found : %d", pid);
         return *head;
     } 
     
@@ -253,29 +253,29 @@ struct task * deletetask(struct task **head, int pid)
 }
 
 void display_obj_list(struct object *head){
-    printk("\nDisplaying object list");
+    // printk("\nDisplaying object list");
     while(head)
     {
-        printk("\nObject OID -> %llu", head->oid);
+        // printk("\nObject OID -> %llu", head->oid);
         head = head->next;
     }
 }
 
 struct object * deleteobject(struct object **head, unsigned long long int oid)
 {
-    printk("\nInside delete object");
+    // printk("\nInside delete object");
     display_obj_list(*head);
     struct object* temp_head, *prev;
     temp_head = *head;
     if (temp_head != NULL && temp_head->oid == oid) 
         { 
             *head = temp_head->next; 
-            printk("\nObject to be freed found OID: %llu", oid);
+            // printk("\nObject to be freed found OID: %llu", oid);
             kfree(temp_head->address);
             temp_head->address = NULL;
             // printk("\nSet address pointer to NULL");  
             kfree(temp_head);
-            printk("\nReturning object list");         
+            // printk("\nReturning object list");         
             display_obj_list(*head);
             return *head; 
         }
@@ -287,17 +287,17 @@ struct object * deleteobject(struct object **head, unsigned long long int oid)
    
     if (temp_head == NULL) 
     {
-        printk("\nobject not found : %d", oid);
+        // printk("\nobject not found : %d", oid);
         return *head;
     } 
     
     prev->next = temp_head->next;
-    printk("\nObject to be freed found OID: %llu", oid);
+    // printk("\nObject to be freed found OID: %llu", oid);
     kfree(temp_head->address);
     temp_head->address = NULL; 
     // printk("\nSet address pointer to NULL");  
     kfree(temp_head);
-    printk("\nReturning object list");
+    // printk("\nReturning object list");
     display_obj_list(*head);
     return *head;
 }
@@ -310,57 +310,19 @@ void display_list(void)
         struct task *tl = tc->task_list;
         while(tl)
         {
-            printk("\n CID : %llu ----  PID : %d State: %d", tc->cid, tl->currTask->pid, tl->currTask->state);
+            // printk("\n CID : %llu ----  PID : %d State: %d", tc->cid, tl->currTask->pid, tl->currTask->state);
             tl=tl->next;
         }
         struct object *ol = tc->object_list;
         while(ol)
         {
-            printk("\n CID : %llu ----  OID : %d", tc->cid, ol->oid);
+            // printk("\n CID : %llu ----  OID : %d", tc->cid, ol->oid);
             ol=ol->next;
         }
         tc = tc->next;
     }
 }
 
-// struct task * get_next_task(struct task **head, int pid)
-// {
-//     struct container *temp_container;
-//     temp_container = container_head;
-//     struct task* temp_task_head;
-//     int tflag = 0;
-
-//     while(temp_container)
-//     {
-//         temp_task_head = temp_container->task_list;
-//         while(temp_task_head)
-//         {
-//             if (temp_task_head->currTask->pid == pid)
-//                 {
-//                     tflag = 1;
-//                     break;
-//                 }
-//             temp_task_head=temp_task_head->next;
-//         }
-//         if (tflag)
-//             break;
-//         temp_container=temp_container->next;        
-//     }
-
-    
-    
-//     if (tflag)
-//     {    
-//         if (temp_task_head->next)
-//             return temp_task_head->next;
-//         else if (temp_container)
-//             return temp_container->task_list;
-//         else
-//             return NULL;
-//     }
-//     else
-//         return NULL;  
-// }
 
 int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
 {
@@ -376,9 +338,9 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     int object_size = vma->vm_end - vma->vm_start;
     //Getting oid
     unsigned long long int oid = vma->vm_pgoff;
-    printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, oid);
-    printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
-    printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
+    // printk("\nInside mmap : PID -> %d --- OID -> %lu", pid, oid);
+    // printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
+    // printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
     int flag = 0;
     struct object *temp_object_list;
     if (temp_container)
@@ -392,7 +354,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
             {        
                 flag = 1;
                 remap_pfn_range(vma, vma->vm_start, existing_object->pfn, object_size, vma->vm_page_prot);
-                printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                // printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             }
         }
         //Create object if it doesn't exist
@@ -400,28 +362,28 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
         {
             struct object *curr_object;
             temp_object_list = addobject(&temp_object_list, oid);
-            printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            // printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             temp_container->object_list = temp_object_list;
             curr_object = findobject(temp_object_list, oid);
             if (curr_object)
             {
-                printk("\nObject created successfully : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                // printk("\nObject created successfully : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                 char *memory_space = (char*) (kmalloc((object_size)*sizeof(char), GFP_KERNEL ));
                 curr_object->address = memory_space;
                 unsigned long pfn = virt_to_phys((void*)memory_space)>>PAGE_SHIFT;
                 curr_object->pfn = pfn;
                 int remaped = remap_pfn_range(vma, vma->vm_start, pfn, object_size,vma->vm_page_prot);
-                printk("\nmmap done successfully");
+                // printk("\nmmap done successfully");
                 display_obj_list(temp_container->object_list);
                 if (remaped < 0)
                 {
-                    printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                    // printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                 }
             }
         }
     }
     else{
-        printk("\nContainer with PID -> %d not found", pid);
+        // printk("\nContainer with PID -> %d not found", pid);
     }
     mutex_unlock(&my_mutex);
     return 0;
@@ -441,7 +403,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     struct container *temp_container;
     temp_container = findcontainer(pid);
     if (temp_container)
-        printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
+        // printk("\nInside lock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
     int flag =0;
     //Applying lock on current container
@@ -451,7 +413,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
         mutex_lock(&(temp_container->object_lock));
     }
     else{
-        printk("\nContainer with PID -> %d not found", pid);
+        // printk("\nContainer with PID -> %d not found", pid);
         mutex_unlock(&my_mutex);
     }
     return 0;
@@ -471,7 +433,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
     struct container *temp_container;
     temp_container = findcontainer(pid);
     if (temp_container)
-        printk("\nInside unlock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
+        // printk("\nInside unlock : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
 
     int flag =0;
     //Removing lock from current container
@@ -481,7 +443,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
         mutex_unlock(&(temp_container->object_lock));
     }
     else{
-        printk("\nContainer with PID -> %d not found", pid);
+        // printk("\nContainer with PID -> %d not found", pid);
         mutex_unlock(&my_mutex);
     }
     return 0;
@@ -499,26 +461,15 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
     struct container *temp_container;
     temp_container = findcontainer(pid);
     unsigned long long int cid = temp_container->cid;
-    printk("\nInside Delete : CID -> %llu --- PID -> %d", cid, pid);
+    // printk("\nInside Delete : CID -> %llu --- PID -> %d", cid, pid);
     //Deleting task from container
     if(temp_container)
     {
     
         struct task *temp_task_head = temp_container->task_list;
         temp_task_head = deletetask(&temp_task_head, pid);
-        printk("\n Task deleted : %d within Container : %llu", pid, cid); 
+        // printk("\n Task deleted : %d within Container : %llu", pid, cid); 
         temp_container->task_list = temp_task_head;
-        // if (!temp_task_head)
-        // {
-        //     struct object *temp_object_list = temp_container->object_list;
-        //     while(temp_object_list)
-        //     {
-        //         printk("\nDeleting object CID -> %llu --- OID -> %llu", cid, temp_object_list->oid);
-        //         temp_object_list = deleteobject(&temp_object_list, temp_object_list->oid); 
-        //     }
-        //     container_head = deletecontainer(&container_head, cid);
-        //     printk("\n Container Deleted : %llu", cid);
-        // }
     }
     // printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
     display_list();
@@ -538,7 +489,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
     unsigned long long int cid = temp_cmd.cid;
     //Setting calling thread's associated pid
     int pid = current->pid;
-    printk("\nInside Create : CID -> %llu --- PID -> %d", cid, pid);
+    // printk("\nInside Create : CID -> %llu --- PID -> %d", cid, pid);
     struct container *temp_container;
     temp_container = container_head;
     //Searching if a container is already present with the given cid
@@ -552,7 +503,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
             task_head = temp_container->task_list;
             task_head = addtask(&task_head, current);
             temp_container->task_list = task_head;
-            printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
+            // printk("\nExisting Container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
             flag = 1;
             break;
         }
@@ -577,7 +528,7 @@ int memory_container_create(struct memory_container_cmd __user *user_cmd)
             }
             temp_container=temp_container->next;
         }
-       printk("\n New container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
+       // printk("\n New container -> Creating task : CID -> %llu --- PID -> %d", cid, pid);
     }
     display_list();
     mutex_unlock(&my_mutex);
@@ -600,7 +551,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
     struct object *temp_object_list;
 
     if (temp_container)
-        printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
+        // printk("\nInside Free : CID -> %llu --- PID -> %d --- OID -> %llu", temp_container->cid, pid, oid);
     //Freeing memory allocated for current oid in current container
     if (temp_container)
     {
@@ -609,14 +560,14 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
         {
             temp_object_list = deleteobject(&temp_object_list, oid);
             temp_container->object_list = temp_object_list;
-            printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            // printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
         else{
-            printk("\nObject list empty: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            // printk("\nObject list empty: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
     }
     else{
-        printk("\nContainer with PID -> %d not found", pid);
+        // printk("\nContainer with PID -> %d not found", pid);
     }
     mutex_unlock(&my_mutex);
     return 0;
