@@ -418,9 +418,11 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
         temp_object_list = temp_container->object_list;
         if (temp_object_list)
         {
-            if (findobject(temp_object_list, oid)) 
+            struct object *existing_object = findobject(temp_object_list, oid);
+            if (existing_object) 
             {        
                 flag = 1;
+                remap_pfn_range(vma, vma->vm_start, existing_object->pfn, object_size, vma->vm_page_prot);
                 printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             }
         }
@@ -434,9 +436,9 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
             if (curr_object)
             {
                 printk("\nObject created successfully : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-                char *memory_space = (char*)(kmalloc(object_size, GFP_KERNEL ));
+                char *memory_space = (char*) kmalloc((object_size)*sizeof(char), GFP_KERNEL );
                 curr_object->address = memory_space;
-                unsigned long pfn = virt_to_phys(memory_space);
+                unsigned long pfn = virt_to_phys((void*)memory_space)>>PAGE_SHIFT;
                 curr_object->pfn = pfn;
                 int remaped = remap_pfn_range(vma, vma->vm_start, pfn, object_size,vma->vm_page_prot);
                 printk("\nmmap done successfully");
@@ -483,10 +485,10 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
                 if (temp_lock->oid == oid)
                 { 
                     // mutex_init(&(temp_lock->object_lock));
-                    mutex_unlock(&my_mutex);
-                    mutex_lock(&(temp_lock->object_lock));
                     flag = 1;
                     printk("\nLock exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                    mutex_unlock(&my_mutex);
+                    mutex_lock(&(temp_lock->object_lock));
                     break;
                 }
                 else
@@ -582,12 +584,12 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
         temp_task_head = deletetask(&temp_task_head, pid);
         printk("\n Task deleted : %d within Container : %llu", pid, cid); 
         temp_container->task_list = temp_task_head;
-        // if (!temp_task_head)
-        // {
-        //     container_head = deletecontainer(&container_head, cid);
-        //     printk("\n Container Deleted : %llu", cid);
-        //     break;
-        // }
+        if (!temp_task_head)
+        {
+            container_head = deletecontainer(&container_head, cid);
+            printk("\n Container Deleted : %llu", cid);
+            break;
+        }
     }
     // printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
     display_list();
