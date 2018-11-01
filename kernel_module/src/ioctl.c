@@ -588,7 +588,6 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
         {
             container_head = deletecontainer(&container_head, cid);
             printk("\n Container Deleted : %llu", cid);
-            break;
         }
     }
     // printk("\nDeleting task : CID -> %llu --- PID -> %d", cid, pid);
