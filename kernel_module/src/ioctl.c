@@ -294,6 +294,8 @@ struct object * deleteobject(struct object **head, int oid)
     if (temp_head != NULL && temp_head->oid == oid) 
         { 
             *head = temp_head->next;   
+            kfree(temp_head->address);
+            temp_head->address = NULL;
             kfree(temp_head);
             printk("\nReturning object list");         
             return *head; 
@@ -311,7 +313,9 @@ struct object * deleteobject(struct object **head, int oid)
         return *head;
     } 
     
-    prev->next = temp_head->next; 
+    prev->next = temp_head->next;
+    kfree(temp_head->address);
+    temp_head->address = NULL; 
     kfree(temp_head);
     printk("\nReturning object list");
     return *head;
@@ -664,19 +668,14 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
             temp_object = temp_container->object_list;
             while(temp_object)
             {
-                if (temp_object->oid == oid)
-                { 
-                    flag = 1;
-                    printk("\nObject to be freed found CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-                    kfree(temp_object->address);
-                    temp_object->address = NULL;
-                    printk("\nSet address pointer to NULL");
-                    temp_object_list = deleteobject(temp_object, oid);
-                    printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-                    break;
-                }
-                else
-                    temp_object = temp_object->next;
+                flag = 1;
+                printk("\nObject to be freed found CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                kfree(temp_object->address);
+                temp_object->address = NULL;
+                printk("\nSet address pointer to NULL");
+                temp_object_list = deleteobject(temp_object, oid);
+                printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+                break;
             }
         }
         if (flag)
