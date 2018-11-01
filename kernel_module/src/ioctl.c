@@ -586,6 +586,12 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
         temp_container->task_list = temp_task_head;
         if (!temp_task_head)
         {
+            struct object *temp_object_list = temp_container->object_list;
+            while(temp_object_list)
+            {
+                printk("\nDeleting object CID -> %llu --- OID -> %llu", cid, temp_object_list->oid);
+                temp_object_list = deleteobject(temp_object_list, oid); 
+            }
             container_head = deletecontainer(&container_head, cid);
             printk("\n Container Deleted : %llu", cid);
         }
