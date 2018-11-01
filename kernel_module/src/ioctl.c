@@ -579,12 +579,12 @@ int memory_container_delete(struct memory_container_cmd __user *user_cmd)
             temp_task_head = deletetask(&temp_task_head, pid);
             printk("\n Task deleted : %d within Container : %llu", pid, cid); 
             temp_container->task_list = temp_task_head;
-            if (!temp_task_head)
-            {
-                container_head = deletecontainer(&container_head, cid);
-                printk("\n Container Deleted : %llu", cid);
-                break;
-            }
+            // if (!temp_task_head)
+            // {
+            //     container_head = deletecontainer(&container_head, cid);
+            //     printk("\n Container Deleted : %llu", cid);
+            //     break;
+            // }
         }
         temp_container = temp_container->next;
     }
