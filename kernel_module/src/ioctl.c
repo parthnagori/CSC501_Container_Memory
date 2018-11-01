@@ -408,40 +408,34 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     printk("\n mmap start -> %lu --- end -> %lu", vma->vm_start, vma->vm_end);
     printk("\n mmap diff : %lu", vma->vm_end - vma->vm_start);
     int flag = 0;
+    struct object *temp_object_list;
     if (temp_container)
     {
-        if (temp_container->object_list)
+        temp_object_list = temp_container->object_list;
+        if (temp_object_list)
         {
-            struct object *temp_object;
-            temp_object = temp_container->object_list;
-            while(temp_object)
-            {
-                if (temp_object->oid == oid)
-                { 
-                    flag = 1;
-                    printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-                    break;
-                }
-                else
-                    temp_object = temp_object->next;
+            if (findobject(temp_object_list, oid)) 
+            {        
+                flag = 1;
+                printk("\nObject exists: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             }
         }
         if (!flag)
         {
-            struct object *object_head;
             struct object *curr_object;
-            object_head = temp_container->object_list;
-            object_head = addobject(&object_head, oid);
+            temp_object_list = addobject(temp_object_list, oid);
             printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
-            temp_container->object_list = object_head;
-            curr_object = findobject(temp_container->object_list, oid);
+            temp_container->object_list = temp_object_list;
+            curr_object = findobject(temp_object_list, oid);
             if (curr_object)
             {
+                printk("\nObject created successfully : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                 char *memory_space = (char*)(kmalloc(object_size, GFP_KERNEL ));
                 curr_object->address = memory_space;
                 unsigned long pfn = virt_to_phys(memory_space);
                 curr_object->pfn = pfn;
                 int remaped = remap_pfn_range(vma, vma->vm_start, pfn, object_size,vma->vm_page_prot);
+                printk("\nmmap done successfully");
                 if (remaped < 0)
                 {
                     printk("\n Can't remap CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
