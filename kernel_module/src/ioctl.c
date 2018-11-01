@@ -668,9 +668,8 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
     {
         if (temp_container->object_list)
         {
-            struct object *temp_object;
-            temp_object = temp_container->object_list;
-            while(temp_object)
+            temp_object_list = temp_container->object_list;
+            while(temp_object_list)
             {
                 flag = 1;
                 temp_object_list = deleteobject(temp_object, oid);
