@@ -423,7 +423,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
         if (!flag)
         {
             struct object *curr_object;
-            temp_object_list = addobject(temp_object_list, oid);
+            temp_object_list = addobject(&temp_object_list, oid);
             printk("\nCreating object : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
             temp_container->object_list = temp_object_list;
             curr_object = findobject(temp_object_list, oid);
@@ -671,7 +671,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
         temp_object_list = temp_container->object_list;
         if (temp_object_list)
         {
-            temp_object_list = deleteobject(temp_object_list, oid);
+            temp_object_list = deleteobject(&temp_object_list, oid);
             temp_container->object_list = temp_object_list;
             printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
         }
