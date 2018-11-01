@@ -288,6 +288,7 @@ struct task * deletetask(struct task **head, int pid)
 
 struct object * deleteobject(struct object **head, int oid)
 {
+    printk("\nInside delete object");
     struct object* temp_head, *prev;
     temp_head = *head;
     if (temp_head != NULL && temp_head->oid == oid) 
@@ -311,6 +312,7 @@ struct object * deleteobject(struct object **head, int oid)
     
     prev->next = temp_head->next; 
     kfree(temp_head);
+    printk("\nReturning object list");
     return *head;
 }
 
@@ -664,8 +666,10 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
                 if (temp_object->oid == oid)
                 { 
                     flag = 1;
+                    printk("\nObject to be freed found CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     kfree(temp_object->address);
                     temp_object->address = NULL;
+                    printk("\nSet address pointer to NULL");
                     temp_object_list = deleteobject(temp_object, oid);
                     printk("\nObject Deleted: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
                     break;
