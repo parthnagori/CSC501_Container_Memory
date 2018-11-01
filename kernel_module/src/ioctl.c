@@ -505,6 +505,7 @@ int memory_container_lock(struct memory_container_cmd __user *user_cmd)
     }
     else{
         printk("\nContainer with PID -> %d not found", pid);
+        mutex_unlock(&my_mutex);
     }
     return 0;
 }
@@ -536,6 +537,7 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
             {
                 if (temp_lock->oid == oid)
                 { 
+                    mutex_unlock(&my_mutex);
                     mutex_unlock(&(temp_lock->object_lock));
                     flag = 1;
                     printk("\nLock unlocked: CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
@@ -548,12 +550,13 @@ int memory_container_unlock(struct memory_container_cmd __user *user_cmd)
         if (!flag)
         {
             printk("\nLock not found : CID -> %llu --- PID -> %d --- OID: %llu", temp_container->cid, pid, oid);
+            mutex_unlock(&my_mutex);
         }
     }
     else{
         printk("\nContainer with PID -> %d not found", pid);
+        mutex_unlock(&my_mutex);
     }
-    mutex_unlock(&my_mutex);
     return 0;
 }
 
