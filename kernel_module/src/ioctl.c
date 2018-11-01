@@ -112,6 +112,7 @@ struct container * findcontainer(int pid)
 {
     struct container *head;
     head = container_head;
+    cid = head->cid
 
     if (cid)
     {
@@ -238,6 +239,8 @@ struct task * deletetask(struct task **head, int pid)
 {
     struct task* temp_head, *prev;
     temp_head = *head;
+
+
     if (temp_head != NULL && temp_head->currTask->pid == pid) 
         { 
             *head = temp_head->next;   
@@ -263,10 +266,11 @@ struct task * deletetask(struct task **head, int pid)
 }
 
 
-struct object * deleteobject(struct object **head, int oid)
+struct object * deleteobject(struct object **head, int oid, currObject)
 {
     struct object* temp_head, *prev;
     temp_head = *head;
+
     if (temp_head != NULL && temp_head->currObject->oid == oid) 
     {
         *head = temp_head->next;
@@ -361,7 +365,7 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     unsigned long ObjSize;
     unsigned long long int currCid;
 
-    struct vm_area_struct* mem_vma = (struct vm_area_struct*) kcalloc(1,sizeof(struct *), GFP_KERNEL);
+    struct vm_area_struct* mem_vma = (struct vm_area_struct*) kcalloc(1,sizeof(struct), GFP_KERNEL);
     mutex_lock(&lock);
     copy_from_user(mem_vma, vma, sizeof(struct vm_area_struct));
 
@@ -373,8 +377,8 @@ int memory_container_mmap(struct file *filp, struct vm_area_struct *vma)
     int pid = current->pid;
 
     temp_container = findcontainer(pid);
-    currCid = temp_container->cid
-    currHead = container_head
+    currCid = temp_container->cid;
+    currHead = container_head;
 
     while (currCid != NULL) 
     {
@@ -597,6 +601,7 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
 {   
     mutex_lock(&my_mutex);
     struct memory_container_cmd temp_cmd;
+    unsigned long long int cid = temp_cmd.cid;
     copy_from_user(&temp_cmd, user_cmd, sizeof(struct memory_container_cmd));
     int pid = current->pid;
     struct container *temp_container;
@@ -606,16 +611,18 @@ int memory_container_free(struct memory_container_cmd __user *user_cmd)
         if (temp_container->cid == cid)
         {
             struct object *temp_object_head = temp_container->object_list;
+            
             if (temp_object_head)
             {
-                kfree(object->address);
-                object->address = NULL;
-                temp_object_head = deleteobject(&temp_object_head,oid)
+                obj = findobject(&temp_object_head,oid);
+                kfree(obj->address);
+                obj->address = NULL;
+                temp_object_head = deleteobject(&temp_object_head,oid);
                 temp_container -> object_list = temp_object_head;
             }
-            if (!temp_object_head)
+            else
             {
-                printk("\n No Object with oid: %d  exits in Container with cid: %llu", oid,cid);
+                printk("\n No Object with oid: %d exits in Container with cid: %llu", oid,cid);
                 break;
             }
         }
