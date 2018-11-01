@@ -294,7 +294,8 @@ struct object * deleteobject(struct object **head, int oid)
     if (temp_head != NULL && temp_head->oid == oid) 
         { 
             *head = temp_head->next;   
-            kfree(temp_head);         
+            kfree(temp_head);
+            printk("\nReturning object list");         
             return *head; 
         }
 
